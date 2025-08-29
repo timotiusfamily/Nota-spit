@@ -63,5 +63,3 @@ export function renderFilteredPurchaseHistory(filteredPurchases) {
         actionCell.appendChild(deleteButton);
     });
 }
-
-// ... (Fungsi lainnya)
