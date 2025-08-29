@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Toko Maju Jaya</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+<div class="main-content-wrapper w-full max-w-sm p-6 bg-white rounded-xl shadow-lg">
+    <h1 class="text-3xl font-extrabold text-center text-gray-900 mb-6">Toko Maju Jaya</h1>
+    <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
+    <form id="loginForm" onsubmit="event.preventDefault(); login();">
+        <div class="mb-4">
+            <label for="loginEmail" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+            <input type="email" id="loginEmail" placeholder="Masukkan email Anda" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+        <div class="mb-6">
+            <label for="loginPassword" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
+            <input type="password" id="loginPassword" placeholder="Masukkan password Anda" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+        <div class="flex items-center justify-between mb-4">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full">
+                Login
+            </button>
+        </div>
+        <div class="text-center text-sm text-gray-600">
+            Belum punya akun? <a href="register.html" class="text-blue-500 hover:underline">Daftar di sini</a>
+        </div>
+    </form>
+</div>
+
+<script type="module" src="main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+</body>
+</html>

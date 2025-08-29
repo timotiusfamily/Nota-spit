@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toko Maju Jaya</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1f2937">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col items-center">
+
+<header class="w-full max-w-xl p-4 bg-gray-900 text-white flex justify-between items-center rounded-b-xl shadow-lg fixed top-0 z-50">
+    <h1 class="text-xl font-extrabold tracking-wider">Toko Maju Jaya</h1>
+    <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-lg text-sm transition duration-200">
+        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+    </button>
+</header>
+
+<div class="main-content-area mt-[80px] w-full max-w-xl p-2 md:p-6 flex flex-col items-center">
+
+<div class="main-content-wrapper w-full p-6 bg-white rounded-xl shadow-lg mb-5 content-section active" id="dashboardSection">
+    <h1 class="text-2xl font-extrabold text-center text-gray-900 mb-6">Ringkasan Dashboard</h1>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-blue-100 p-4 rounded-lg shadow-md">
+            <h3 class="text-lg font-bold text-blue-800">Total Penjualan</h3>
+            <p id="dashboardTotalSales" class="text-3xl font-extrabold text-blue-900">Rp. 0</p>
+        </div>
+        <div class="bg-green-100 p-4 rounded-lg shadow-md">
+            <h3 class="text-lg font-bold text-green-800">Total Laba/Rugi</h3>
+            <p id="dashboardTotalProfit" class="text-3xl font-extrabold text-green-900">Rp. 0</p>
+        </div>
+        <div class="bg-yellow-100 p-4 rounded-lg shadow-md">
+            <h3 class="text-lg font-bold text-yellow-800">Total Pembelian</h3>
+            <p id="dashboardTotalPurchases" class="text-3xl font-extrabold text-yellow-900">Rp. 0</p>
+        </div>
+        <div class="bg-gray-100 p-4 rounded-lg shadow-md">
+            <h3 class="text-lg font-bold text-gray-800">Nilai Stok Saat Ini</h3>
+            <p id="dashboardTotalStockValue" class="text-3xl font-extrabold text-gray-900">Rp. 0</p>
+        </div>
+    </div>
+</div>
+
+<div class="main-content-wrapper w-full p-6 bg-white rounded-xl shadow-lg mb-5 content-section" id="penjualanSection">
+    <h1 class="text-2xl font-extrabold text-center text-gray-900 mb-6">Aplikasi Nota Penjualan</h1>
+    <div class="mb-4">
+        <label for="namaToko" class="block text-gray-700 text-sm mb-2">Nama Toko:</label>
+        <input type="text" id="namaToko" placeholder="Contoh: Toko Maju Jaya" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+    </div>
+    <div class="flex flex-wrap -mx-2 mb-4">
+        <div class="w-full md:w-1/2 px-2 mb-4 md:mb-0">
+            <label for="tanggalPenjualan" class="block text-gray-700 text-sm mb-2">Tanggal Nota:</label>
+            <input type="date" id="tanggalPenjualan" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="w-full md:w-1/2 px-2">
+            <label for="namaPembeli" class="block text-gray-700 text-sm mb-2">Nama Pembeli:</label>
+            <input type="text" id="namaPembeli" placeholder="Masukkan nama pembeli" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+    </div>
+    <h2 class="text-xl font-bold text-center text-gray-900 mb-4">Daftar Barang Penjualan</h2>
+    <div class="flex items-end gap-2 mb-4">
+        <div class="flex-grow">
+            <label for="namaBarangPenjualan" class="block text-gray-700 text-sm mb-2">Nama Barang:</label>
+            <input type="text" id="namaBarangPenjualan" placeholder="Cari atau masukkan nama barang" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div id="namaBarangSuggestionsPenjualan" class="absolute bg-white border border-gray-300 rounded-b-lg w-full max-h-40 overflow-y-auto z-10 shadow-md"></div>
+        </div>
+        <button class="search-icon-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" onclick="openMasterItemModal('penjualan')"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="flex flex-wrap -mx-2 mb-4 qty-price-group">
+        <div class="w-1/2 md:w-1/3 px-2 mb-4 md:mb-0 form-item">
+            <label for="jumlahKuantitasPenjualan" class="block text-gray-700 text-sm mb-2">Jumlah Kuantitas:</label>
+            <input type="number" id="jumlahKuantitasPenjualan" placeholder="Qty" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="w-1/2 md:w-1/3 px-2 mb-4 md:mb-0 form-item">
+            <label for="hargaSatuanPenjualan" class="block text-gray-700 text-sm mb-2">Harga Jual (Rp.):</label>
+            <input type="number" id="hargaSatuanPenjualan" placeholder="Harga Jual" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="w-full md:w-1/3 px-2 form-item">
+            <label for="hargaBeliPenjualan" class="block text-gray-700 text-sm mb-2">Harga Beli (Rp.):</label>
+            <input type="number" id="hargaBeliPenjualan" placeholder="Harga Beli" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+    </div>
+    <div class="flex justify-center gap-4 mb-6">
+        <button onclick="tambahAtauUpdateBarangPenjualan()" id="btnAddUpdatePenjualan" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200">Tambah Barang</button>
+        <button onclick="batalEditPenjualan()" id="btnCancelEditPenjualan" style="display: none;" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-200">Batal Edit</button>
+    </div>
+    <div class="overflow-x-auto mb-6 rounded-lg shadow-md">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga Jual</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga Beli</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Laba/Rugi</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="daftarBelanjaPenjualan" class="divide-y divide-gray-200"></tbody>
+            <tfoot class="bg-gray-50">
+                <tr class="total-row">
+                    <td colspan="5" class="py-2 px-3 text-right text-sm font-bold text-gray-900">Total Penjualan:</td>
+                    <td id="grandTotalPenjualan" class="py-2 px-3 text-left text-sm font-bold text-gray-900">Rp. 0</td>
+                    <td id="grandTotalLabaRugi" class="py-2 px-3 text-left text-sm font-bold text-gray-900">Rp. 0</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div class="flex flex-wrap justify-center gap-4 mb-6">
+        <button onclick="selesaikanPembayaran()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">Selesaikan Pembayaran</button>
+        <button onclick="simpanTransaksiPending()" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-200">Simpan Transaksi Pending</button>
+    </div>
+    <div id="printerCard" class="mt-8 pt-4 border-t border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 shadow-inner" style="display: none;">
+        <h2 class="text-lg font-bold text-center text-gray-900 mb-4">Cetak Struk</h2>
+        <div id="strukOutputPenjualan" class="mb-4"></div>
+        <div id="shareButtonsPenjualan" class="flex flex-col gap-4">
+            <button onclick="cetakStruk()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200">
+                <i class="fas fa-print mr-2"></i> Cetak Struk
+            </button>
+            <button onclick="shareViaWhatsAppPenjualan()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-200">
+                <i class="fab fa-whatsapp mr-2"></i> Bagikan Via WhatsApp
+            </button>
+            <div id="downloadStrukBtnContainer" class="flex justify-end pt-2">
+                <button onclick="downloadStrukJPG()" class="bg-gray-500 hover:bg-gray-600 text-white py-1 px-2 rounded-lg text-xs transition duration-200">
+                    <i class="fas fa-image mr-1"></i> Download JPG
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="main-content-wrapper w-full p-6 bg-white rounded-xl shadow-lg mb-5 content-section" id="pembelianSection">
+    <h1 class="text-2xl font-extrabold text-center text-gray-900 mb-6">Aplikasi Nota Pembelian</h1>
+    <div class="mb-4">
+        <label for="namaSupplier" class="block text-gray-700 text-sm mb-2">Nama Supplier:</label>
+        <input type="text" id="namaSupplier" placeholder="Contoh: PT. Maju Jaya" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+    </div>
+    <div class="mb-4">
+        <label for="tanggalPembelian" class="block text-gray-700 text-sm mb-2">Tanggal Nota Pembelian:</label>
+        <input type="date" id="tanggalPembelian" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+    </div>
+    <h2 class="text-xl font-bold text-center text-gray-900 mb-4">Daftar Barang Pembelian</h2>
+    <div class="flex items-end gap-2 mb-4">
+        <div class="flex-grow">
+            <label for="namaBarangPembelian" class="block text-gray-700 text-sm mb-2">Nama Barang:</label>
+            <input type="text" id="namaBarangPembelian" placeholder="Cari atau masukkan nama barang" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div id="namaBarangSuggestionsPembelian" class="absolute bg-white border border-gray-300 rounded-b-lg w-full max-h-40 overflow-y-auto z-10 shadow-md"></div>
+        </div>
+        <button class="search-icon-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" onclick="openMasterItemModal('pembelian')"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="flex flex-wrap -mx-2 mb-4 qty-price-group">
+        <div class="w-1/2 md:w-1/3 px-2 mb-4 md:mb-0 form-item">
+            <label for="jumlahKuantitasPembelian" class="block text-gray-700 text-sm mb-2">Jumlah Kuantitas:</label>
+            <input type="number" id="jumlahKuantitasPembelian" placeholder="Qty" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="w-1/2 md:w-1/3 px-2 mb-4 md:mb-0 form-item">
+            <label for="hargaBeliPembelian" class="block text-gray-700 text-sm mb-2">Harga Beli (Rp.):</label>
+            <input type="number" id="hargaBeliPembelian" placeholder="Harga Beli" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="w-full md:w-1/3 px-2 form-item">
+            <label for="hargaJualPembelian" class="block text-gray-700 text-sm mb-2">Harga Jual (Rp.):</label>
+            <input type="number" id="hargaJualPembelian" placeholder="Harga Jual" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+    </div>
+    <div class="flex justify-center gap-4 mb-6">
+        <button onclick="tambahAtauUpdateBarangPembelian()" id="btnAddUpdatePembelian" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200">Tambah Barang</button>
+        <button onclick="batalEditPembelian()" id="btnCancelEditPembelian" style="display: none;" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-200">Batal Edit</button>
+    </div>
+    <div class="overflow-x-auto mb-6 rounded-lg shadow-md">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga Beli</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="daftarBelanjaPembelian" class="divide-y divide-gray-200"></tbody>
+            <tfoot class="bg-gray-50">
+                <tr class="total-row">
+                    <td colspan="4" class="py-2 px-3 text-right text-sm font-bold text-gray-900">Total Pembelian:</td>
+                    <td id="grandTotalPembelian" class="py-2 px-3 text-left text-sm font-bold text-gray-900">Rp. 0</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div class="flex justify-center gap-4 mb-6">
+        <button onclick="simpanNotaPembelian()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">Simpan Nota Pembelian</button>
+    </div>
+    <div id="strukOutputPembelian" class="mt-8 pt-4 border-t border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 shadow-inner" style="display: none;">
+        <h2 class="text-lg font-bold text-center text-gray-900 mb-4">Preview Nota Pembelian</h2>
+        <div id="strukContentPembelian">
+            <p id="strukNamaSupplierPembelian" class="text-center text-gray-700 mb-1"></p>
+            <p id="strukTanggalPembelianPreview" class="text-center text-gray-700 mb-4"></p>
+            <div id="strukItemsPembelian" class="mb-4"></div>
+            <p class="text-right text-lg font-bold text-gray-900" id="strukGrandTotalPembelianPreview"></p>
+        </div>
+        <div id="shareButtonsPembelian" class="flex justify-center gap-4 mt-6">
+            <button onclick="shareViaWhatsAppPembelian()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-200">
+                <i class="fab fa-whatsapp mr-2"></i> Bagikan Via WhatsApp
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="main-content-wrapper w-full p-6 bg-white rounded-xl shadow-lg mb-5 content-section" id="masterSection">
+    <h2 class="text-2xl font-extrabold text-center text-gray-900 mb-6">Daftar Barang Master</h2>
+    <div class="flex justify-end gap-3 mb-4">
+        <button onclick="backupMasterItems()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200 flex items-center gap-2">
+            <i class="fas fa-download"></i> Backup
+        </button>
+        <button onclick="document.getElementById('restoreFileInput').click()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200 flex items-center gap-2">
+            <i class="fas fa-upload"></i> Restore
+        </button>
+        <input type="file" id="restoreFileInput" accept=".json" class="hidden">
+    </div>
+    <div class="overflow-x-auto rounded-lg shadow-md">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga Jual</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga Beli</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="masterItemsList" class="divide-y divide-gray-200"></tbody>
+        </table>
+    </div>
+    <div class="flex justify-center mt-6">
+        <button id="clearMasterItemsBtn" onclick="clearMasterItems()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200">Hapus Semua Barang Master</button>
+    </div>
+</div>
+
+<div class="main-content-wrapper w-full p-6 bg-white rounded-xl shadow-lg mb-5 content-section" id="historySection">
+    <h2 class="text-2xl font-extrabold text-center text-gray-900 mb-6">Riwayat Transaksi</h2>
+    
+    <div class="flex flex-wrap gap-3 mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <div class="flex-1 min-w-[120px]">
+            <label for="historyFilterStartDate" class="block text-gray-700 text-sm mb-1">Dari Tanggal:</label>
+            <input type="date" id="historyFilterStartDate" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+        </div>
+        <div class="flex-1 min-w-[120px]">
+            <label for="historyFilterEndDate" class="block text-gray-700 text-sm mb-1">Sampai Tanggal:</label>
+            <input type="date" id="historyFilterEndDate" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+        </div>
+        <div class="flex-1 min-w-[120px]">
+            <label for="historyFilterName" class="block text-gray-700 text-sm mb-1">Nama Pembeli/Supplier:</label>
+            <input type="text" id="historyFilterName" placeholder="Cari nama..." class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+        </div>
+        <button onclick="filterHistory()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 self-end">Filter Riwayat</button>
+    </div>
+
+    <h3 class="text-xl font-bold text-gray-900 mb-4">Riwayat Penjualan</h3>
+    <div class="overflow-x-auto mb-6 rounded-lg shadow-md">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Nota</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pembeli</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Penjualan</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Laba/Rugi</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="salesHistoryListBody" class="divide-y divide-gray-200"></tbody>
+        </table>
+    </div>
+    <div class="flex justify-center mt-6">
+        <button id="clearSalesHistoryBtn" onclick="clearSalesHistory()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200">Hapus Semua Riwayat Penjualan</button>
+    </div>
+    <h3 class="text-xl font-bold text-gray-900 mt-8 mb-4">Riwayat Pembelian</h3>
+    <div class="overflow-x-auto mb-6 rounded-lg shadow-md">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Nota</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pembelian</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="purchaseHistoryListBody" class="divide-y divide-gray-200"></tbody>
+        </table>
+    </div>
+    <div class="flex justify-center mt-6">
+        <button id="clearPurchaseHistoryBtn" onclick="clearPurchaseHistory()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200">Hapus Semua Riwayat Pembelian</button>
+    </div>
+</div>
+
+<div class="main-content-wrapper w-full p-6 bg-white rounded-xl shadow-lg mb-5 content-section" id="pendingSection">
+    <h2 class="text-2xl font-extrabold text-center text-gray-900 mb-6">Transaksi Penjualan Tertunda</h2>
+    <div class="overflow-x-auto rounded-lg shadow-md">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Transaksi</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pembeli</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="pendingSalesList" class="divide-y divide-gray-200"></tbody>
+        </table>
+    </div>
+    <div class="flex justify-center mt-6">
+        <button id="clearPendingSalesBtn" onclick="clearPendingSales()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200">Hapus Semua Transaksi Pending</button>
+    </div>
+</div>
+
+<div class="main-content-wrapper w-full p-6 bg-white rounded-xl shadow-lg mb-5 content-section" id="profitLossSection">
+    <h2 class="text-2xl font-extrabold text-center text-gray-900 mb-6">Laporan Rugi Laba</h2>
+    <div class="flex flex-wrap gap-3 mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50 filter-controls">
+        <div class="flex-1 min-w-[120px]">
+            <label for="filterStartDate" class="block text-gray-700 text-sm mb-1">Dari Tanggal:</label>
+            <input type="date" id="filterStartDate" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+        </div>
+        <div class="flex-1 min-w-[120px]">
+            <label for="filterEndDate" class="block text-gray-700 text-sm mb-1">Sampai Tanggal:</label>
+            <input type="date" id="filterEndDate" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+        </div>
+        <div class="flex-1 min-w-[120px]">
+            <label for="filterItemName" class="block text-gray-700 text-sm mb-1">Nama Barang:</label>
+            <input type="text" id="filterItemName" placeholder="Filter per barang" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+        </div>
+        <button onclick="generateProfitLossReport()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 self-end">Filter Laporan</button>
+    </div>
+    
+    <div class="flex justify-between items-center my-4 report-header">
+        <h3 id="profitLossReportTitle" class="text-xl font-bold text-gray-900">Rugi Laba Harian</h3>
+        <div class="flex gap-2">
+            <button onclick="shareProfitLossViaWhatsApp()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded-lg text-sm flex items-center gap-1">
+                <i class="fab fa-whatsapp"></i> Share
+            </button>
+            <button onclick="downloadProfitLossPDF()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-lg text-sm flex items-center gap-1">
+                <i class="fas fa-file-pdf"></i> PDF
+            </button>
+        </div>
+    </div>
+
+    <div id="profitLossReportContainer" class="report-table-container overflow-x-auto rounded-lg shadow-md mb-6">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Penjualan</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Harga Beli</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Laba/Rugi Harian</th>
+                </tr>
+            </thead>
+            <tbody id="dailyProfitLossList" class="divide-y divide-gray-200"></tbody>
+        </table>
+    </div>
+    <div class="report-summary p-4 bg-green-100 rounded-lg font-bold text-gray-900">
+        <p>Total Laba/Rugi Filtered: <span id="totalFilteredProfitLoss">Rp. 0</span></p>
+    </div>
+</div>
+
+<div class="main-content-wrapper w-full p-6 bg-white rounded-xl shadow-lg mb-5 content-section" id="salesReportSection">
+    <h2 class="text-2xl font-extrabold text-center text-gray-900 mb-6">Laporan Penjualan</h2>
+    <div class="flex flex-wrap gap-3 mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50 filter-controls">
+        <div class="flex-1 min-w-[120px]">
+            <label for="salesFilterStartDate" class="block text-gray-700 text-sm mb-1">Dari Tanggal:</label>
+            <input type="date" id="salesFilterStartDate" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+        </div>
+        <div class="flex-1 min-w-[120px]">
+            <label for="salesFilterEndDate" class="block text-gray-700 text-sm mb-1">Sampai Tanggal:</label>
+            <input type="date" id="salesFilterEndDate" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+        </div>
+        <div class="flex-1 min-w-[120px]">
+            <label for="salesFilterName" class="block text-gray-700 text-sm mb-1">Nama Pembeli:</label>
+            <input type="text" id="salesFilterName" placeholder="Cari nama pembeli..." class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+        </div>
+        <button onclick="generateSalesReport()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 self-end">Filter Laporan</button>
+    </div>
+    
+    <div id="salesReportContainer">
+        <div class="flex justify-between items-center my-4">
+            <h3 class="text-xl font-bold text-gray-900">Ringkasan Penjualan Harian</h3>
+            <div class="flex gap-2">
+                <button onclick="shareSalesReportViaWhatsApp()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded-lg text-sm flex items-center gap-1">
+                    <i class="fab fa-whatsapp"></i> Share
+                </button>
+                <button onclick="downloadSalesReportPDF()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-lg text-sm flex items-center gap-1">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+            </div>
+        </div>
+        <div id="dailySalesSummaryTable" class="report-table-container overflow-x-auto rounded-lg shadow-md mb-6">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                        <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Penjualan</th>
+                        <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Laba/Rugi</th>
+                        <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="dailySalesList" class="divide-y divide-gray-200"></tbody>
+            </table>
+        </div>
+        <div class="report-summary p-4 bg-blue-100 rounded-lg font-bold text-gray-900">
+            <p>Total Penjualan Filtered: <span id="totalFilteredSales">Rp. 0</span></p>
+        </div>
+    </div>
+    
+    <div id="salesDetailContainer" class="hidden mt-8 pt-4 border-t border-dashed border-gray-300">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-900">Detail Transaksi <span id="salesDetailDate"></span></h3>
+            <div class="flex gap-2">
+                <button onclick="shareSalesDetailsViaWhatsApp()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded-lg text-sm flex items-center gap-1">
+                    <i class="fab fa-whatsapp"></i> Share
+                </button>
+                <button onclick="downloadSalesDetailsPDF()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-lg text-sm flex items-center gap-1">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+                <button onclick="hideSalesDetails()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-lg text-sm flex items-center gap-1">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </button>
+            </div>
+        </div>
+        <div id="salesDetailContent" class="bg-white p-4 rounded-lg shadow-md"></div>
+    </div>
+</div>
+
+<div class="main-content-wrapper w-full p-6 bg-white rounded-xl shadow-lg mb-5 content-section" id="stockSection">
+    <h2 class="text-2xl font-extrabold text-center text-gray-900 mb-6">Laporan Stok Barang</h2>
+    <div class="flex flex-wrap gap-3 mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <div class="flex-1 min-w-[120px]">
+            <label for="stockFilterItemName" class="block text-gray-700 text-sm mb-1">Nama Barang:</label>
+            <input type="text" id="stockFilterItemName" placeholder="Cari barang..." class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+        </div>
+        <button onclick="generateStockReport()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 self-end">Filter Stok</button>
+    </div>
+
+    <div class="flex justify-end gap-2 my-4">
+        <button onclick="shareStockReportViaWhatsApp()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded-lg text-sm flex items-center gap-1">
+            <i class="fab fa-whatsapp"></i> Share
+        </button>
+        <button onclick="downloadStockReportPDF()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-lg text-sm flex items-center gap-1">
+            <i class="fas fa-file-pdf"></i> PDF
+        </button>
+    </div>
+    
+    <div id="stockReportContainer" class="report-table-container overflow-x-auto rounded-lg shadow-md">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stok Saat Ini</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga Jual</th>
+                    <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga Beli</th>
+                </tr>
+            </thead>
+            <tbody id="stockReportList" class="divide-y divide-gray-200"></tbody>
+        </table>
+    </div>
+    <p class="text-sm text-gray-600 mt-4">*(Catatan: Stok dihitung berdasarkan master barang dan transaksi penjualan/pembelian yang tercatat.)*</p>
+</div>
+
+</div> 
+<div id="masterItemModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeMasterItemModal()">×</span>
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Pilih Barang Master</h2>
+        <input type="text" id="masterItemSearchInput" placeholder="Cari barang..." class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
+        <div class="overflow-x-auto rounded-lg shadow-md">
+            <table id="modalMasterItemsTable" class="min-w-full bg-white">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
+                        <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga Jual</th>
+                        <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga Beli</th>
+                        <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
+                        <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pilih</th>
+                    </tr>
+                </thead>
+                <tbody id="modalMasterItemsList" class="divide-y divide-gray-200"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="editMasterItemModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeEditMasterItemModal()">×</span>
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Edit Barang Master</h2>
+        <form onsubmit="event.preventDefault(); saveEditedMasterItem();">
+            <div class="mb-4">
+                <label for="editMasterItemName" class="block text-gray-700 text-sm mb-2">Nama Barang:</label>
+                <input type="text" id="editMasterItemName" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label for="editMasterItemSellingPrice" class="block text-gray-700 text-sm mb-2">Harga Jual (Rp.):</label>
+                <input type="number" id="editMasterItemSellingPrice" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label for="editMasterItemPurchasePrice" class="block text-gray-700 text-sm mb-2">Harga Beli (Rp.):</label>
+                <input type="number" id="editMasterItemPurchasePrice" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label for="editMasterItemStock" class="block text-gray-700 text-sm mb-2">Stok:</label>
+                <input type="number" id="editMasterItemStock" class="shadow-sm appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="flex justify-end gap-4">
+                <button type="button" onclick="closeEditMasterItemModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">Batal</button>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="customMessageBox" class="modal">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeMessageBox()">×</span>
+        <p id="messageBoxText" class="text-gray-800 text-base mb-6"></p>
+        <div class="flex justify-center gap-4">
+            <button id="messageBoxConfirmBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" style="display: none;">OK</button>
+            <button id="messageBoxCancelBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-200" style="display: none;">Batal</button>
+        </div>
+    </div>
+</div>
+
+<div class="mobile-nav flex justify-around items-center">
+    <button id="navDashboard" onclick="showSection('dashboard', this)" class="active"><i class="fas fa-chart-bar"></i><span class="nav-label">Dash</span></button>
+    <button id="navPenjualan" onclick="showSection('penjualan', this)"><i class="fas fa-cash-register"></i><span class="nav-label">Jual</span></button>
+    <button id="navPembelian" onclick="showSection('pembelian', this)"><i class="fas fa-shopping-basket"></i><span class="nav-label">Beli</span></button>
+    <button id="navMaster" onclick="showSection('master', this)"><i class="fas fa-boxes"></i><span class="nav-label">Master</span></button>
+    <button id="navPending" onclick="showSection('pending', this)"><i class="fas fa-hourglass-half"></i><span class="nav-label">Pending</span></button>
+    <button id="navHistory" onclick="showSection('history', this)"><i class="fas fa-history"></i><span class="nav-label">Riwayat</span></button>
+    <button id="navProfitLoss" onclick="showSection('profitLoss', this)"><i class="fas fa-chart-line"></i><span class="nav-label">Rugi Laba</span></button>
+    <button id="navSalesReport" onclick="showSection('salesReport', this)"><i class="fas fa-file-invoice-dollar"></i><span class="nav-label">Lap. Penjualan</span></button>
+    <button id="navStock" onclick="showSection('stock', this)"><i class="fas fa-warehouse"></i><span class="nav-label">Stok</span></button>
+</div>
+
+<script type="module" src="main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+</body>
+</html>
