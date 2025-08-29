@@ -1,10 +1,6 @@
 import { showMessageBox, showTemporaryAlert } from './utils.js';
 import { renderMasterItems } from './ui.js';
 
-// Hapus baris-baris ini:
-// export const auth = firebase.auth();
-// export const db = firebase.firestore();
-
 // Mengambil data dari Firestore
 export async function loadDataFromFirestore() {
     try {
