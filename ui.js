@@ -2,51 +2,6 @@ import { formatRupiah, showMessageBox } from './utils.js';
 import { loadDataFromFirestore, saveDataToFirestore, addOrUpdateMasterItem, deleteMasterItem, clearMasterItems } from './data.js';
 import { renderDashboard, generateSalesReport, showSalesDetails, hideSalesDetails, generateStockReport, filterHistory, renderPendingSales, generateProfitLossReport } from './reports.js';
 
-// Fungsi untuk navigasi antar tab
-export function showSection(sectionId, clickedButton, keepCurrentTransaction = false) {
-    const sections = document.querySelectorAll('.main-content-wrapper.content-section');
-    sections.forEach(section => {
-        section.style.display = 'none';
-        section.classList.remove('active');
-    });
-
-    const activeSection = document.getElementById(`${sectionId}Section`);
-    if (activeSection) {
-        activeSection.style.display = 'block';
-        activeSection.classList.add('active');
-    }
-
-    const navButtons = document.querySelectorAll('.mobile-nav button');
-    navButtons.forEach(btn => btn.classList.remove('active'));
-    if (clickedButton) {
-        clickedButton.classList.add('active');
-    }
-
-    window.currentTransactionType = sectionId;
-
-    if (!keepCurrentTransaction) {
-        if (sectionId === 'penjualan') {
-            window.resetCurrentTransaction('penjualan');
-        } else if (sectionId === 'pembelian') {
-            window.resetCurrentTransaction('pembelian');
-        }
-    }
-    
-    if (sectionId === 'dashboard') {
-        renderDashboard();
-    } else if (sectionId === 'history') {
-        filterHistory();
-    } else if (sectionId === 'pending') {
-        renderPendingSales();
-    } else if (sectionId === 'profitLoss') {
-        generateProfitLossReport();
-    } else if (sectionId === 'salesReport') {
-        generateSalesReport();
-    } else if (sectionId === 'stock') {
-        generateStockReport();
-    }
-}
-
 // Fungsi Autocomplete dan Pencarian
 export function showSuggestions(type) {
     const inputElement = (type === 'penjualan') ? document.getElementById('namaBarangPenjualan') : document.getElementById('namaBarangPembelian');
