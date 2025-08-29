@@ -49,8 +49,7 @@ export function tambahAtauUpdateBarangPenjualan() {
     } else {
         window.masterItems.push({ name: namaBarang, price: hargaSatuan, purchasePrice: hargaBeli, stock: 0 });
     }
-    saveDataToFirestore();
-
+    
     hitungUlangTotal('penjualan');
     renderTablePenjualan();
     clearBarangInputs('penjualan');
