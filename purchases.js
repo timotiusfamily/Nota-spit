@@ -1,4 +1,3 @@
-
 import { formatRupiah, hitungUlangTotal, clearBarangInputs, showTemporaryAlert, showMessageBox } from './utils.js';
 import { saveDataToFirestore } from './data.js';
 import { generateStockReport } from './reports.js';
@@ -63,7 +62,7 @@ export async function tambahAtauUpdateBarangPembelian() {
             window.masterItems.push({ name: namaBarang, price: hargaJual, purchasePrice: hargaBeli, stock: jumlahKuantitas });
         }
     }
-    await saveDataToFirestore();
+    
     hitungUlangTotal('pembelian');
     renderTablePembelian();
     clearBarangInputs('pembelian');
@@ -193,4 +192,3 @@ export function shareViaWhatsAppPembelian() {
     message += `\n*TOTAL: ${formatRupiah(lastStruk.totalPembelian)}*\n\nTerima kasih!\n_Dibuat dengan Aplikasi Nota & Stok_`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
 }
-
