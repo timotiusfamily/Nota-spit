@@ -1,4 +1,4 @@
-import { loadDataFromFirestore, logout, restoreMasterItems } from './data.js';
+import { loadDataFromFirestore, logout, restoreMasterItems, saveDataToFirestore } from './data.js';
 import * as ui from './ui.js';
 import * as sales from './sales.js';
 import * as purchases from './purchases.js';
@@ -37,8 +37,53 @@ window.currentStrukData = null;
 window.editingMasterItemIndex = null;
 window.currentDetailedSales = [];
 
+// Fungsi untuk navigasi antar tab
+function showSection(sectionId, clickedButton, keepCurrentTransaction = false) {
+    const sections = document.querySelectorAll('.main-content-wrapper.content-section');
+    sections.forEach(section => {
+        section.style.display = 'none';
+        section.classList.remove('active');
+    });
+
+    const activeSection = document.getElementById(`${sectionId}Section`);
+    if (activeSection) {
+        activeSection.style.display = 'block';
+        activeSection.classList.add('active');
+    }
+
+    const navButtons = document.querySelectorAll('.mobile-nav button');
+    navButtons.forEach(btn => btn.classList.remove('active'));
+    if (clickedButton) {
+        clickedButton.classList.add('active');
+    }
+
+    window.currentTransactionType = sectionId;
+
+    if (!keepCurrentTransaction) {
+        if (sectionId === 'penjualan') {
+            utils.resetCurrentTransaction('penjualan');
+        } else if (sectionId === 'pembelian') {
+            utils.resetCurrentTransaction('pembelian');
+        }
+    }
+    
+    if (sectionId === 'dashboard') {
+        reports.renderDashboard();
+    } else if (sectionId === 'history') {
+        reports.filterHistory();
+    } else if (sectionId === 'pending') {
+        reports.renderPendingSales();
+    } else if (sectionId === 'profitLoss') {
+        reports.generateProfitLossReport();
+    } else if (sectionId === 'salesReport') {
+        reports.generateSalesReport();
+    } else if (sectionId === 'stock') {
+        reports.generateStockReport();
+    }
+}
+
 // Mengekspos fungsi-fungsi dari modul ke scope global agar bisa dipanggil dari HTML
-Object.assign(window, { ...ui, ...sales, ...purchases, ...reports, ...utils, restoreMasterItems });
+Object.assign(window, { ...ui, ...sales, ...purchases, ...reports, ...utils, restoreMasterItems, showSection });
 
 // Inisialisasi Aplikasi
 document.addEventListener('DOMContentLoaded', (event) => {
@@ -72,7 +117,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
             
             document.getElementById('restoreFileInput').addEventListener('change', restoreMasterItems);
             
-            ui.showSection('dashboard', document.getElementById('navDashboard'));
+            showSection('dashboard', document.getElementById('navDashboard'));
 
             const firstDayOfMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
             document.getElementById('salesFilterStartDate').value = firstDayOfMonth;
